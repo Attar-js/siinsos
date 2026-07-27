@@ -1,0 +1,39 @@
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+    <title>Inovasi Sosial</title>
+    <meta name="robots" content="noindex, follow">
+    <meta name="description" content="">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+
+    <!-- Favicon (sama dengan logo sidebar / login) -->
+    <link rel="icon" type="image/png" href="{{ asset('images/logo/itk-logo-sidebar.png') }}">
+    <link rel="shortcut icon" type="image/png" href="{{ asset('images/logo/itk-logo-sidebar.png') }}">
+    <link rel="apple-touch-icon" href="{{ asset('images/logo/itk-logo-sidebar.png') }}">
+
+    <!-- CSS  -->
+    <link rel="stylesheet" href="{{ asset('assets/css/vendor/bootstrap.min.css') }}">
+    <link rel="stylesheet" href="{{ asset('assets/css/vendor/slick.css') }}">
+    <link rel="stylesheet" href="{{ asset('assets/css/vendor/slick-theme.css') }}">
+    <link rel="stylesheet" href="{{ asset('assets/css/plugins/sal.css') }}">
+    <link rel="stylesheet" href="{{ asset('assets/css/plugins/feather.css') }}">
+    <link rel="stylesheet" href="{{ asset('assets/css/plugins/fontawesome.min.css') }}">
+    <link rel="stylesheet" href="{{ asset('assets/css/plugins/euclid-circulara.css') }}">
+    <link rel="stylesheet" href="{{ asset('assets/css/plugins/swiper.css') }}">
+    <link rel="stylesheet" href="{{ asset('assets/css/plugins/odometer.css') }}">
+    <link rel="stylesheet" href="{{ asset('assets/css/plugins/animation.css') }}">
+    <link rel="stylesheet" href="{{ asset('assets/css/plugins/bootstrap-select.min.css') }}">
+    <link rel="stylesheet" href="{{ asset('assets/css/plugins/jquery-ui.css') }}">
+    <link rel="stylesheet" href="{{ asset('assets/css/plugins/magnigy-popup.min.css') }}">
+    <link rel="stylesheet" href="{{ asset('assets/css/plugins/plyr.css') }}">
+    <link rel="stylesheet" href="{{ asset('assets/css/plugins/jodit.min.css') }}">
+
+    <link rel="stylesheet" href="{{ asset('assets/css/styles.css') }}">
+    <style>
+        .logo a img {
+            object-fit: contain;
+        }
+    </style>
+</head>
+
