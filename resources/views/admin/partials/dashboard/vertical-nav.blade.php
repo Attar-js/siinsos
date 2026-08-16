@@ -63,6 +63,18 @@
             <span class="item-name">Kelola Admin</span>
         </a>
     </li>
+    <li class="nav-item">
+        <a class="nav-link sidebar-menu-page {{ activeMenu(['template-dokumen.index']) }}" href="{{ route('admin.template-dokumen.index') }}">
+            <i class="icon">
+                <svg width="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M7 3H14L19 8V20C19 20.5523 18.5523 21 18 21H7C6.44772 21 6 20.5523 6 20V4C6 3.44772 6.44772 3 7 3Z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/>
+                    <path d="M14 3V8H19" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/>
+                    <path d="M9 13H16M9 17H14" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                </svg>
+            </i>
+            <span class="item-name">Template Dokumen</span>
+        </a>
+    </li>
 
     <li><hr class="hr-horizontal"></li>
 

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\DocumentTemplate;
 use App\Services\TemplateDownloadLinkService;
 use Illuminate\Http\RedirectResponse;
 
@@ -9,21 +10,27 @@ class TemplateDokumenController extends Controller
 {
     public function index()
     {
-        $templates = config('template_dokumen.templates', []);
+        $templates = DocumentTemplate::query()
+            ->active()
+            ->orderBy('sort_order')
+            ->orderBy('title')
+            ->get();
 
         return view('pages.template-dokumen', compact('templates'));
     }
 
     public function download(string $key, TemplateDownloadLinkService $linkService): RedirectResponse
     {
-        $template = collect(config('template_dokumen.templates', []))
-            ->firstWhere('key', $key);
+        $template = DocumentTemplate::query()
+            ->active()
+            ->where('key', $key)
+            ->first();
 
-        if (!is_array($template)) {
+        if (!$template) {
             abort(404);
         }
 
-        $downloadUrl = $template['download_url'] ?? '';
+        $downloadUrl = $template->download_url ?? '';
 
         if (!$linkService->isAvailable($downloadUrl)) {
             return redirect()

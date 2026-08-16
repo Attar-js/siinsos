@@ -18,6 +18,7 @@ use App\Http\Controllers\Admin\AssignKelompokController;
 use App\Http\Controllers\Admin\TambahDosenController;
 use App\Http\Controllers\Admin\TambahAdminController;
 use App\Http\Controllers\Admin\ImportUserController;
+use App\Http\Controllers\Admin\TemplateDokumenController;
 use App\Http\Controllers\Admin\PenilaianController;
 use App\Http\Controllers\Admin\Security\RolePermission;
 use App\Http\Controllers\Admin\Security\RoleController;
@@ -210,6 +211,14 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
         Route::get('/{id}/edit', [TambahAdminController::class, 'edit'])->name('tambah-admin.edit');
         Route::put('/{id}', [TambahAdminController::class, 'update'])->name('tambah-admin.update');
         Route::delete('/{id}', [TambahAdminController::class, 'destroy'])->name('tambah-admin.destroy');
+    });
+
+    // Template dokumen (link unduh untuk halaman landing)
+    Route::middleware('admin')->prefix('template-dokumen')->name('template-dokumen.')->group(function () {
+        Route::get('/', [TemplateDokumenController::class, 'index'])->name('index');
+        Route::post('/', [TemplateDokumenController::class, 'store'])->name('store');
+        Route::put('/{template}', [TemplateDokumenController::class, 'update'])->name('update');
+        Route::delete('/{template}', [TemplateDokumenController::class, 'destroy'])->name('destroy');
     });
 
     // Penilaian

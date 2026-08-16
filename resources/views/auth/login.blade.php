@@ -343,14 +343,14 @@
             <div class="form-title">
                 <h1 class="main-title">Silakan melakukan Log In:</h1>
                 <div class="divider"></div>
-                <p class="subtitle">Login dengan User dan Password Gerbang</p>
+                <p class="subtitle">Login dengan Email dan Password Gerbang</p>
             </div>
 
             <form method="POST" action="{{ route('login') }}">
                 @csrf
                 
                 <div class="form-group">
-                    <label for="username" class="form-label">Username</label>
+                    <label for="username" class="form-label">Email</label>
                     <div class="input-group">
                         <i class="fas fa-user input-icon"></i>
                         <input type="text" 
@@ -358,7 +358,7 @@
                                id="username" 
                                name="username" 
                                value="{{ old('username') }}" 
-                               placeholder="Masukkan Username"
+                               placeholder="Masukkan Email"
                                required 
                                autofocus>
                     </div>

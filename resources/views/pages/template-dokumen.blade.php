@@ -154,30 +154,29 @@
         <p>Download template dokumen untuk kegiatan Inovasi Sosial</p>
     </div>
 
+    @if(session('error'))
+        <div class="alert alert-danger" role="alert">{{ session('error') }}</div>
+    @endif
+
     <div class="template-grid">
-        @foreach($templates as $template)
-            <div class="template-card" id="template-{{ $template['key'] }}">
+        @forelse($templates as $template)
+            <div class="template-card" id="template-{{ $template->key }}">
                 <div class="template-card-icon">
                     <i class="fas fa-file-alt"></i>
                 </div>
                 <div class="template-card-body">
-                    <h3 class="template-card-title">{{ $template['title'] }}</h3>
-                    <p class="template-card-meta">{{ $template['meta'] }}</p>
+                    <h3 class="template-card-title">{{ $template->title }}</h3>
                 </div>
                 <div class="template-card-actions">
-                    <a href="{{ $template['view_url'] }}"
-                       target="_blank"
-                       rel="noopener noreferrer"
-                       class="template-btn template-btn-lihat">
-                        Lihat
-                    </a>
-                    <a href="{{ route('template.download', $template['key']) }}"
+                    <a href="{{ route('template.download', $template->key) }}"
                        class="template-btn template-btn-unduh">
                         Unduh
                     </a>
                 </div>
             </div>
-        @endforeach
+        @empty
+            <p class="text-center text-muted" style="grid-column: 1 / -1;">Template dokumen belum tersedia.</p>
+        @endforelse
     </div>
 </div>
 @endsection

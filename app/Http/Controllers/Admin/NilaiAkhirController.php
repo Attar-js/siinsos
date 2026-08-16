@@ -16,6 +16,30 @@ use PhpOffice\PhpSpreadsheet\Style\Border;
 use PhpOffice\PhpSpreadsheet\Style\Fill;
 use OpenApi\Attributes as OA;
 
+#[OA\Info(
+    version: '1.0.0',
+    title: 'SIINSOS API — Nilai Akhir',
+    description: 'Dokumentasi API tarik data nilai akhir untuk sistem mitra. Contoh nilai di skema bersifat ilustrasi; data asli diambil dari database setelah request berhasil.
+
+Cara uji:
+1. Klik Authorize di kanan atas.
+2. Isi X-API-KEY dengan nilai MITRA_API_KEY pada file .env.
+3. Klik Authorize, lalu Execute.
+
+Tanpa API key, server mengembalikan 401.',
+)]
+#[OA\Server(
+    url: L5_SWAGGER_CONST_HOST,
+    description: 'Server SIINSOS'
+)]
+#[OA\SecurityScheme(
+    securityScheme: 'ApiKeyAuth',
+    type: 'apiKey',
+    in: 'header',
+    name: 'X-API-KEY',
+    description: 'Masukkan API key mitra untuk endpoint tarik data nilai.'
+)]
+#[OA\Tag(name: 'Nilai Akhir', description: 'Tarik data nilai akhir mahasiswa (untuk sistem mitra)')]
 #[OA\Schema(
     schema: 'NilaiAkhirKomponen',
     properties: [
@@ -71,16 +95,6 @@ class NilaiAkhirController extends Controller
     /**
      * API endpoint for real-time dashboard data
      */
-    #[OA\Get(
-        path: '/nilai-akhir/api/real-time-data',
-        tags: ['Nilai'],
-        summary: 'Data nilai real-time untuk dashboard',
-        description: 'Mengambil data nilai terbaru untuk pembaruan dashboard secara real-time (AJAX). Membutuhkan sesi login (auth).',
-        responses: [
-            new OA\Response(response: 200, description: 'Data real-time berhasil diambil'),
-            new OA\Response(response: 401, description: 'Belum login'),
-        ]
-    )]
     public function getRealTimeData()
     {
         try {
@@ -116,35 +130,6 @@ class NilaiAkhirController extends Controller
     /**
      * API endpoint untuk menerima input nilai dari project-akhir
      */
-    #[OA\Post(
-        path: '/nilai-akhir/api/receive-nilai',
-        tags: ['Nilai'],
-        summary: 'Menerima input nilai dari project-akhir',
-        description: 'Menyimpan atau memperbarui nilai mahasiswa (per dosen) ke database project_akhir. Dipanggil oleh aplikasi project-akhir saat dosen menginput nilai. Endpoint ini tanpa autentikasi.',
-        requestBody: new OA\RequestBody(
-            required: true,
-            content: new OA\JsonContent(
-                required: ['mahasiswa_nim', 'dosen_id', 'nilai_akhir'],
-                properties: [
-                    new OA\Property(property: 'mahasiswa_nim', type: 'string', example: '2010001'),
-                    new OA\Property(property: 'dosen_id', type: 'integer', example: 3),
-                    new OA\Property(property: 'nilai_akhir', type: 'number', format: 'float', minimum: 0, maximum: 100, example: 85.5),
-                    new OA\Property(property: 'proposal_kegiatan', type: 'number', format: 'float', minimum: 0, maximum: 100, nullable: true, example: 80),
-                    new OA\Property(property: 'asistensi', type: 'number', format: 'float', minimum: 0, maximum: 100, nullable: true, example: 90),
-                    new OA\Property(property: 'peer_review', type: 'number', format: 'float', minimum: 0, maximum: 100, nullable: true, example: 88),
-                    new OA\Property(property: 'laporan_akhir', type: 'number', format: 'float', minimum: 0, maximum: 100, nullable: true, example: 85),
-                    new OA\Property(property: 'presentasi_akhir', type: 'number', format: 'float', minimum: 0, maximum: 100, nullable: true, example: 87),
-                    new OA\Property(property: 'pembimbing_lapangan', type: 'number', format: 'float', minimum: 0, maximum: 100, nullable: true, example: 90),
-                    new OA\Property(property: 'tanggal_penilaian', type: 'string', format: 'date', nullable: true, example: '2026-06-15'),
-                ]
-            )
-        ),
-        responses: [
-            new OA\Response(response: 200, description: 'Nilai berhasil disimpan'),
-            new OA\Response(response: 422, description: 'Validasi gagal'),
-            new OA\Response(response: 500, description: 'Terjadi kesalahan server'),
-        ]
-    )]
     public function receiveNilaiInput(Request $request)
     {
         try {
@@ -252,16 +237,6 @@ class NilaiAkhirController extends Controller
         }
     }
 
-    #[OA\Get(
-        path: '/nilai-akhir/api/real-time-with-notification',
-        tags: ['Nilai'],
-        summary: 'Data nilai real-time + notifikasi',
-        description: 'Mengambil data nilai terbaru beserta informasi notifikasi perubahan untuk dashboard (AJAX). Membutuhkan sesi login (auth).',
-        responses: [
-            new OA\Response(response: 200, description: 'Data real-time dengan notifikasi berhasil diambil'),
-            new OA\Response(response: 401, description: 'Belum login'),
-        ]
-    )]
     public function getRealTimeDataWithNotification()
     {
         try {
