@@ -401,7 +401,7 @@
                     <i class="fas fa-arrow-right"></i>
                 </button>
             </form>
-
+{{-- 
             <div class="login-separator"><span>Tim MK Penciri</span></div>
 
             <a href="{{ route('dashboard.login') }}" class="btn-penciri">
@@ -414,7 +414,7 @@
                 Copyright © 2025 Institut Teknologi Kalimantan
             </div>
         </div>
-    </div>
+    </div> --}}
 
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>

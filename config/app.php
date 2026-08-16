@@ -123,6 +123,8 @@ return [
 
     'key' => env('APP_KEY'),
 
+    'mitra_api_key' => env('MITRA_API_KEY'),
+
     'previous_keys' => [
         ...array_filter(
             explode(',', env('APP_PREVIOUS_KEYS', ''))

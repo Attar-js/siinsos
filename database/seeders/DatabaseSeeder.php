@@ -95,19 +95,19 @@ class DatabaseSeeder extends Seeder
         );
 
         // Akun tim MK penciri (dashboard verifikasi: /tim-penciri/dashboard).
-        User::updateOrCreate(
-            ['email' => 'penciri@insos.test'],
-            [
-                'name' => 'Tim MK Penciri',
-                'username' => 'penciri',
-                'first_name' => 'Tim',
-                'last_name' => 'Penciri',
-                'program_studi' => 'Informatika',
-                'password' => Hash::make('password123'),
-                'user_type' => 'user',
-                'role' => 'tim_penciri',
-                'status' => 'active',
-            ]
-        );
+        // User::updateOrCreate(
+        //     ['email' => 'penciri@insos.test'],
+        //     [
+        //         'name' => 'Tim MK Penciri',
+        //         'username' => 'penciri',
+        //         'first_name' => 'Tim',
+        //         'last_name' => 'Penciri',
+        //         'program_studi' => 'Informatika',
+        //         'password' => Hash::make('password123'),
+        //         'user_type' => 'user',
+        //         'role' => 'tim_penciri',
+        //         'status' => 'active',
+        //     ]
+        // );
     }
 }

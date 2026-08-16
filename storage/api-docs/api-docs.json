@@ -1,17 +1,1297 @@
 {
     "openapi": "3.0.0",
     "info": {
-        "title": "API Sistem Penilaian KKN (project-akhir)",
-        "description": "Dokumentasi API untuk sistem penilaian KKN. Menyediakan endpoint untuk status verifikasi kelompok, daftar dosen, dan penugasan dosen ke kelompok.",
+        "title": "SIINSOS API",
+        "description": "Dokumentasi API SIINSOS. Contoh nilai di skema (example) bersifat ilustrasi. Data asli diambil dari database setelah request berhasil.\n\nCara uji endpoint Nilai Akhir:\n1. Klik tombol Authorize di kanan atas.\n2. Isi X-API-KEY dengan nilai MITRA_API_KEY pada file .env.\n3. Klik Authorize, lalu Execute.\n\nTanpa langkah itu, server mengembalikan 401 dan data mahasiswa tidak diambil. Tag lain adalah dokumentasi internal dashboard.",
         "version": "1.0.0"
     },
     "servers": [
         {
             "url": "http://localhost:8000",
-            "description": "Server pengembangan lokal"
+            "description": "Server SIINSOS"
         }
     ],
     "paths": {
+        "/api/kkn/store-from-external": {
+            "post": {
+                "tags": [
+                    "KKN"
+                ],
+                "summary": "Menerima pendaftaran KKN dari project-akhir",
+                "description": "Menyimpan data pendaftaran KKN beserta anggota kelompok dan file proposal (PDF). Dikirim oleh aplikasi project-akhir saat mahasiswa mendaftar.",
+                "operationId": "476f16274300d3e6081c73f92e390a28",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "required": [
+                                    "judul_kegiatan",
+                                    "mitra",
+                                    "lokasi_mitra",
+                                    "nama[]",
+                                    "nim[]",
+                                    "prodi[]",
+                                    "peran[]",
+                                    "file",
+                                    "user_nim"
+                                ],
+                                "properties": {
+                                    "judul_kegiatan": {
+                                        "type": "string",
+                                        "example": "KKN Tematik Desa Sukamaju",
+                                        "maxLength": 255
+                                    },
+                                    "mitra": {
+                                        "type": "string",
+                                        "example": "Pemerintah Desa Sukamaju",
+                                        "maxLength": 100
+                                    },
+                                    "lokasi_mitra": {
+                                        "type": "string",
+                                        "example": "Desa Sukamaju, Kab. Bandung",
+                                        "maxLength": 255
+                                    },
+                                    "nama[]": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "string"
+                                        },
+                                        "example": [
+                                            "Budi Santoso",
+                                            "Siti Aminah"
+                                        ]
+                                    },
+                                    "nim[]": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "string"
+                                        },
+                                        "example": [
+                                            "2010001",
+                                            "2010002"
+                                        ]
+                                    },
+                                    "prodi[]": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "string"
+                                        },
+                                        "example": [
+                                            "Teknik Informatika",
+                                            "Sistem Informasi"
+                                        ]
+                                    },
+                                    "peran[]": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "string",
+                                            "enum": [
+                                                "Ketua",
+                                                "Anggota"
+                                            ]
+                                        },
+                                        "example": [
+                                            "Ketua",
+                                            "Anggota"
+                                        ]
+                                    },
+                                    "file": {
+                                        "description": "File proposal PDF (maks 10MB)",
+                                        "type": "string",
+                                        "format": "binary"
+                                    },
+                                    "user_nim": {
+                                        "type": "string",
+                                        "example": "2010001",
+                                        "maxLength": 20
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Pendaftaran berhasil disimpan"
+                    },
+                    "422": {
+                        "description": "Validasi gagal"
+                    },
+                    "500": {
+                        "description": "Terjadi kesalahan server"
+                    }
+                }
+            }
+        },
+        "/api/kkn/pendaftar": {
+            "get": {
+                "tags": [
+                    "KKN"
+                ],
+                "summary": "Daftar semua pendaftar KKN",
+                "description": "Mengambil seluruh data pendaftar KKN beserta ringkasan anggota dan status verifikasi.",
+                "operationId": "ce3f25ef9803e9761900611ef8d25384",
+                "responses": {
+                    "200": {
+                        "description": "Daftar pendaftar berhasil diambil"
+                    },
+                    "500": {
+                        "description": "Terjadi kesalahan server"
+                    }
+                }
+            }
+        },
+        "/api/kkn/pendaftar/user/{userNim}": {
+            "get": {
+                "tags": [
+                    "KKN"
+                ],
+                "summary": "Daftar pendaftar berdasarkan NIM user",
+                "description": "Mengambil data pendaftaran KKN milik user tertentu berdasarkan NIM.",
+                "operationId": "0dd7e19cc7439e2156686d9224a3d5fe",
+                "parameters": [
+                    {
+                        "name": "userNim",
+                        "in": "path",
+                        "description": "NIM user pendaftar",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "2010001"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Data pendaftar berhasil diambil"
+                    },
+                    "500": {
+                        "description": "Terjadi kesalahan server"
+                    }
+                }
+            }
+        },
+        "/api/kkn/pendaftar/{id}": {
+            "get": {
+                "tags": [
+                    "KKN"
+                ],
+                "summary": "Detail pendaftar KKN",
+                "description": "Mengambil detail satu pendaftar KKN beserta anggotanya berdasarkan ID.",
+                "operationId": "a93cde050c1157ab70f8baaa085667a4",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID pendaftar",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        },
+                        "example": 1
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Detail pendaftar berhasil diambil"
+                    },
+                    "404": {
+                        "description": "Data tidak ditemukan"
+                    }
+                }
+            }
+        },
+        "/api/form-kesediaan/list": {
+            "get": {
+                "tags": [
+                    "Form Kesediaan"
+                ],
+                "summary": "Daftar semua form kesediaan",
+                "description": "Mengambil seluruh data form kesediaan dosen beserta status verifikasinya.",
+                "operationId": "5cc9189fea437c5d1be1bb871d03c882",
+                "responses": {
+                    "200": {
+                        "description": "Daftar form kesediaan berhasil diambil"
+                    }
+                }
+            }
+        },
+        "/api/form-kesediaan/{id}": {
+            "get": {
+                "tags": [
+                    "Form Kesediaan"
+                ],
+                "summary": "Detail form kesediaan",
+                "description": "Mengambil detail satu form kesediaan berdasarkan ID.",
+                "operationId": "baaa8264c6f6f3763a7f23ccbc8602ca",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID form kesediaan",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        },
+                        "example": 1
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Detail form kesediaan berhasil diambil"
+                    },
+                    "404": {
+                        "description": "Data tidak ditemukan"
+                    }
+                }
+            }
+        },
+        "/api/form-kesediaan/{id}/status": {
+            "put": {
+                "tags": [
+                    "Form Kesediaan"
+                ],
+                "summary": "Verifikasi / ubah status form kesediaan",
+                "description": "Mengubah status verifikasi form kesediaan (pending, approved, rejected) beserta catatan opsional.",
+                "operationId": "092cd5c76103794e667cafe626f74f27",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID form kesediaan",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        },
+                        "example": 1
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "status"
+                                ],
+                                "properties": {
+                                    "status": {
+                                        "type": "string",
+                                        "example": "approved",
+                                        "enum": [
+                                            "pending",
+                                            "approved",
+                                            "rejected"
+                                        ]
+                                    },
+                                    "catatan": {
+                                        "type": "string",
+                                        "example": "Disetujui",
+                                        "nullable": true,
+                                        "maxLength": 1000
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Status form kesediaan berhasil diperbarui"
+                    },
+                    "422": {
+                        "description": "Validasi gagal"
+                    }
+                }
+            }
+        },
+        "/api/form-kesediaan/store-from-external": {
+            "post": {
+                "tags": [
+                    "Form Kesediaan"
+                ],
+                "summary": "Menerima form kesediaan dari project-akhir",
+                "description": "Menyimpan form kesediaan dosen beserta file (dikirim sebagai string base64). Endpoint ini juga tersedia sebagai alias di /api/form-kesediaan/store.",
+                "operationId": "3e01232d175cc93f6bd72b42065380c7",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "judul_kegiatan",
+                                    "user_nim",
+                                    "file_content",
+                                    "file_name",
+                                    "file_mime_type",
+                                    "file_size"
+                                ],
+                                "properties": {
+                                    "judul_kegiatan": {
+                                        "type": "string",
+                                        "example": "KKN Tematik Desa Sukamaju",
+                                        "maxLength": 255
+                                    },
+                                    "user_nim": {
+                                        "type": "string",
+                                        "example": "2010001",
+                                        "maxLength": 20
+                                    },
+                                    "file_content": {
+                                        "description": "Isi file PDF dalam base64",
+                                        "type": "string",
+                                        "format": "byte"
+                                    },
+                                    "file_name": {
+                                        "type": "string",
+                                        "example": "form-kesediaan.pdf",
+                                        "maxLength": 255
+                                    },
+                                    "file_mime_type": {
+                                        "type": "string",
+                                        "example": "application/pdf"
+                                    },
+                                    "file_size": {
+                                        "type": "integer",
+                                        "example": 204800
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Form kesediaan berhasil disimpan"
+                    },
+                    "422": {
+                        "description": "Validasi gagal"
+                    },
+                    "500": {
+                        "description": "Terjadi kesalahan server"
+                    }
+                }
+            }
+        },
+        "/api/laporan-akhir/list": {
+            "get": {
+                "tags": [
+                    "Laporan Akhir"
+                ],
+                "summary": "Daftar semua laporan akhir",
+                "description": "Mengambil seluruh data laporan akhir beserta status verifikasinya.",
+                "operationId": "1b45974a86a493714222f90738b5e56a",
+                "responses": {
+                    "200": {
+                        "description": "Daftar laporan akhir berhasil diambil"
+                    }
+                }
+            }
+        },
+        "/api/laporan-akhir/{id}": {
+            "get": {
+                "tags": [
+                    "Laporan Akhir"
+                ],
+                "summary": "Detail laporan akhir",
+                "description": "Mengambil detail satu laporan akhir berdasarkan ID.",
+                "operationId": "9af1a728d3a9e66ad3dfbd3b4d55e497",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID laporan akhir",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        },
+                        "example": 1
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Detail laporan akhir berhasil diambil"
+                    },
+                    "404": {
+                        "description": "Data tidak ditemukan"
+                    }
+                }
+            }
+        },
+        "/api/laporan-akhir/store-from-external": {
+            "post": {
+                "tags": [
+                    "Laporan Akhir"
+                ],
+                "summary": "Menerima laporan akhir dari project-akhir",
+                "description": "Menyimpan laporan akhir beserta file (dikirim sebagai string base64). Endpoint ini juga tersedia sebagai alias di /api/laporan-akhir/store.",
+                "operationId": "0034cbc425cb03992de76a4d467b5d63",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "judul_kegiatan",
+                                    "user_nim",
+                                    "file_content",
+                                    "file_name",
+                                    "file_mime_type",
+                                    "file_size"
+                                ],
+                                "properties": {
+                                    "judul_kegiatan": {
+                                        "type": "string",
+                                        "example": "KKN Tematik Desa Sukamaju",
+                                        "maxLength": 255
+                                    },
+                                    "user_nim": {
+                                        "type": "string",
+                                        "example": "2010001",
+                                        "maxLength": 20
+                                    },
+                                    "file_content": {
+                                        "description": "Isi file PDF dalam base64",
+                                        "type": "string",
+                                        "format": "byte"
+                                    },
+                                    "file_name": {
+                                        "type": "string",
+                                        "example": "laporan-akhir.pdf"
+                                    },
+                                    "file_mime_type": {
+                                        "type": "string",
+                                        "example": "application/pdf"
+                                    },
+                                    "file_size": {
+                                        "type": "integer",
+                                        "example": 204800
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Laporan akhir berhasil disimpan"
+                    },
+                    "422": {
+                        "description": "Validasi gagal"
+                    },
+                    "500": {
+                        "description": "Terjadi kesalahan server"
+                    }
+                }
+            }
+        },
+        "/api/luaran/list": {
+            "get": {
+                "tags": [
+                    "Luaran"
+                ],
+                "summary": "Daftar semua luaran",
+                "description": "Mengambil seluruh data luaran (artikel, video aftermovie, link) beserta statusnya.",
+                "operationId": "bb55a63736d8454efcdf77c1b685c840",
+                "responses": {
+                    "200": {
+                        "description": "Daftar luaran berhasil diambil"
+                    }
+                }
+            }
+        },
+        "/api/luaran/{id}": {
+            "get": {
+                "tags": [
+                    "Luaran"
+                ],
+                "summary": "Detail luaran",
+                "description": "Mengambil detail satu luaran berdasarkan ID.",
+                "operationId": "a3129c24a0980697cb04541acb698150",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID luaran",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        },
+                        "example": 1
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Detail luaran berhasil diambil"
+                    },
+                    "404": {
+                        "description": "Data tidak ditemukan"
+                    }
+                }
+            }
+        },
+        "/api/luaran/{id}/status": {
+            "put": {
+                "tags": [
+                    "Luaran"
+                ],
+                "summary": "Verifikasi / ubah status luaran",
+                "description": "Mengubah status verifikasi luaran (pending, approved, rejected) beserta catatan opsional.",
+                "operationId": "cac3bde23ef8e458f85aae4d7b9ca28b",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID luaran",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        },
+                        "example": 1
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "status"
+                                ],
+                                "properties": {
+                                    "status": {
+                                        "type": "string",
+                                        "example": "approved",
+                                        "enum": [
+                                            "pending",
+                                            "approved",
+                                            "rejected"
+                                        ]
+                                    },
+                                    "catatan": {
+                                        "type": "string",
+                                        "example": "Luaran sudah sesuai",
+                                        "nullable": true,
+                                        "maxLength": 1000
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Status luaran berhasil diperbarui"
+                    },
+                    "422": {
+                        "description": "Validasi gagal"
+                    }
+                }
+            }
+        },
+        "/api/luaran/store-from-external": {
+            "post": {
+                "tags": [
+                    "Luaran"
+                ],
+                "summary": "Menerima luaran dari project-akhir",
+                "description": "Menyimpan luaran berupa file artikel (PDF/DOC/DOCX), link video aftermovie, dan link artikel. Endpoint ini juga tersedia sebagai alias di /api/luaran/store.",
+                "operationId": "a3d8404809f170c1b6d516e7335b4ce1",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "required": [
+                                    "judul_kegiatan",
+                                    "video_aftermovie",
+                                    "artikel_link",
+                                    "artikel_file",
+                                    "user_nim"
+                                ],
+                                "properties": {
+                                    "judul_kegiatan": {
+                                        "type": "string",
+                                        "example": "KKN Tematik Desa Sukamaju",
+                                        "maxLength": 255
+                                    },
+                                    "video_aftermovie": {
+                                        "type": "string",
+                                        "format": "uri",
+                                        "example": "https://youtube.com/watch?v=xxxx"
+                                    },
+                                    "artikel_link": {
+                                        "type": "string",
+                                        "format": "uri",
+                                        "example": "https://media.com/artikel-kkn"
+                                    },
+                                    "artikel_file": {
+                                        "description": "File artikel PDF/DOC/DOCX (maks 10MB)",
+                                        "type": "string",
+                                        "format": "binary"
+                                    },
+                                    "user_nim": {
+                                        "type": "string",
+                                        "example": "2010001",
+                                        "maxLength": 20
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Luaran berhasil disimpan"
+                    },
+                    "422": {
+                        "description": "Validasi gagal"
+                    },
+                    "500": {
+                        "description": "Terjadi kesalahan server"
+                    }
+                }
+            }
+        },
+        "/nilai-akhir/api/real-time-data": {
+            "get": {
+                "tags": [
+                    "Nilai"
+                ],
+                "summary": "Data nilai real-time untuk dashboard",
+                "description": "Mengambil data nilai terbaru untuk pembaruan dashboard secara real-time (AJAX). Membutuhkan sesi login (auth).",
+                "operationId": "93861e72f7ef0c6dbd1f8ea80f1b6da3",
+                "responses": {
+                    "200": {
+                        "description": "Data real-time berhasil diambil"
+                    },
+                    "401": {
+                        "description": "Belum login"
+                    }
+                }
+            }
+        },
+        "/nilai-akhir/api/receive-nilai": {
+            "post": {
+                "tags": [
+                    "Nilai"
+                ],
+                "summary": "Menerima input nilai dari project-akhir",
+                "description": "Menyimpan atau memperbarui nilai mahasiswa (per dosen) ke database project_akhir. Dipanggil oleh aplikasi project-akhir saat dosen menginput nilai. Endpoint ini tanpa autentikasi.",
+                "operationId": "3e72f25093db6eec2c4bad2a0494bddd",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "mahasiswa_nim",
+                                    "dosen_id",
+                                    "nilai_akhir"
+                                ],
+                                "properties": {
+                                    "mahasiswa_nim": {
+                                        "type": "string",
+                                        "example": "2010001"
+                                    },
+                                    "dosen_id": {
+                                        "type": "integer",
+                                        "example": 3
+                                    },
+                                    "nilai_akhir": {
+                                        "type": "number",
+                                        "format": "float",
+                                        "example": 85.5,
+                                        "maximum": 100,
+                                        "minimum": 0
+                                    },
+                                    "proposal_kegiatan": {
+                                        "type": "number",
+                                        "format": "float",
+                                        "example": 80,
+                                        "nullable": true,
+                                        "maximum": 100,
+                                        "minimum": 0
+                                    },
+                                    "asistensi": {
+                                        "type": "number",
+                                        "format": "float",
+                                        "example": 90,
+                                        "nullable": true,
+                                        "maximum": 100,
+                                        "minimum": 0
+                                    },
+                                    "peer_review": {
+                                        "type": "number",
+                                        "format": "float",
+                                        "example": 88,
+                                        "nullable": true,
+                                        "maximum": 100,
+                                        "minimum": 0
+                                    },
+                                    "laporan_akhir": {
+                                        "type": "number",
+                                        "format": "float",
+                                        "example": 85,
+                                        "nullable": true,
+                                        "maximum": 100,
+                                        "minimum": 0
+                                    },
+                                    "presentasi_akhir": {
+                                        "type": "number",
+                                        "format": "float",
+                                        "example": 87,
+                                        "nullable": true,
+                                        "maximum": 100,
+                                        "minimum": 0
+                                    },
+                                    "pembimbing_lapangan": {
+                                        "type": "number",
+                                        "format": "float",
+                                        "example": 90,
+                                        "nullable": true,
+                                        "maximum": 100,
+                                        "minimum": 0
+                                    },
+                                    "tanggal_penilaian": {
+                                        "type": "string",
+                                        "format": "date",
+                                        "example": "2026-06-15",
+                                        "nullable": true
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Nilai berhasil disimpan"
+                    },
+                    "422": {
+                        "description": "Validasi gagal"
+                    },
+                    "500": {
+                        "description": "Terjadi kesalahan server"
+                    }
+                }
+            }
+        },
+        "/nilai-akhir/api/real-time-with-notification": {
+            "get": {
+                "tags": [
+                    "Nilai"
+                ],
+                "summary": "Data nilai real-time + notifikasi",
+                "description": "Mengambil data nilai terbaru beserta informasi notifikasi perubahan untuk dashboard (AJAX). Membutuhkan sesi login (auth).",
+                "operationId": "a470502b1999f2daeed1808fd60ecd2d",
+                "responses": {
+                    "200": {
+                        "description": "Data real-time dengan notifikasi berhasil diambil"
+                    },
+                    "401": {
+                        "description": "Belum login"
+                    }
+                }
+            }
+        },
+        "/api/nilai-akhir": {
+            "get": {
+                "tags": [
+                    "Nilai Akhir"
+                ],
+                "summary": "Tarik data nilai akhir semua mahasiswa (untuk mitra)",
+                "description": "Mengembalikan daftar nilai akhir mahasiswa dalam format JSON. Ditujukan untuk ditarik oleh sistem mitra. Wajib menyertakan header X-API-KEY. Nilai berupa angka 0–100 (bukan huruf).",
+                "operationId": "1240514a473c980a03a30bd090b5444c",
+                "parameters": [
+                    {
+                        "name": "q",
+                        "in": "query",
+                        "description": "Kata kunci pencarian (nama/NIM/kelompok)",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Data berhasil diambil",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "total": {
+                                            "type": "integer",
+                                            "example": 1
+                                        },
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/NilaiAkhirItem"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "API key tidak valid",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "API key tidak valid atau tidak diberikan."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Terjadi kesalahan server",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Terjadi kesalahan server"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/nilai-akhir/{nim}": {
+            "get": {
+                "tags": [
+                    "Nilai Akhir"
+                ],
+                "summary": "Tarik data nilai akhir satu mahasiswa (untuk mitra)",
+                "description": "Mengembalikan nilai akhir satu mahasiswa berdasarkan NIM. Wajib menyertakan header X-API-KEY. Nilai berupa angka 0–100 (bukan huruf).",
+                "operationId": "dd7b569dbd386527ecb0b2799ab3ac72",
+                "parameters": [
+                    {
+                        "name": "nim",
+                        "in": "path",
+                        "description": "NIM mahasiswa",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "10221051"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Data berhasil diambil",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "data": {
+                                            "$ref": "#/components/schemas/NilaiAkhirItem"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "API key tidak valid",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "API key tidak valid atau tidak diberikan."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Data tidak ditemukan",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Data nilai untuk NIM tersebut tidak ditemukan"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Terjadi kesalahan server",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Terjadi kesalahan server"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/peer-review/list": {
+            "get": {
+                "tags": [
+                    "Peer Review"
+                ],
+                "summary": "Daftar semua peer review",
+                "description": "Mengambil seluruh data peer review beserta status verifikasinya.",
+                "operationId": "51a1f29e07b8128c620018ab31f7ade0",
+                "responses": {
+                    "200": {
+                        "description": "Daftar peer review berhasil diambil"
+                    }
+                }
+            }
+        },
+        "/api/peer-review/{id}": {
+            "get": {
+                "tags": [
+                    "Peer Review"
+                ],
+                "summary": "Detail peer review",
+                "description": "Mengambil detail satu peer review berdasarkan ID.",
+                "operationId": "779c239e8214e66ae579d6d709bbcfcc",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID peer review",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        },
+                        "example": 1
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Detail peer review berhasil diambil"
+                    },
+                    "404": {
+                        "description": "Data tidak ditemukan"
+                    }
+                }
+            }
+        },
+        "/api/peer-review/{id}/status": {
+            "put": {
+                "tags": [
+                    "Peer Review"
+                ],
+                "summary": "Verifikasi / ubah status peer review",
+                "description": "Mengubah status verifikasi peer review (pending, approved, rejected) beserta catatan opsional.",
+                "operationId": "1c7acb21cf672a59730e348114a082ec",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID peer review",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        },
+                        "example": 1
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "status"
+                                ],
+                                "properties": {
+                                    "status": {
+                                        "type": "string",
+                                        "example": "approved",
+                                        "enum": [
+                                            "pending",
+                                            "approved",
+                                            "rejected"
+                                        ]
+                                    },
+                                    "catatan": {
+                                        "type": "string",
+                                        "example": "Sudah sesuai",
+                                        "nullable": true,
+                                        "maxLength": 1000
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Status peer review berhasil diperbarui"
+                    },
+                    "422": {
+                        "description": "Validasi gagal"
+                    }
+                }
+            }
+        },
+        "/api/peer-review/store-from-external": {
+            "post": {
+                "tags": [
+                    "Peer Review"
+                ],
+                "summary": "Menerima peer review dari project-akhir",
+                "description": "Menyimpan peer review beserta file (dikirim sebagai string base64). Endpoint ini juga tersedia sebagai alias di /api/peer-review/store.",
+                "operationId": "cf1dfb8f5fd71c224e7cbd5da20e26b7",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "judul_kegiatan",
+                                    "user_nim",
+                                    "file_content",
+                                    "file_name",
+                                    "file_mime_type",
+                                    "file_size"
+                                ],
+                                "properties": {
+                                    "judul_kegiatan": {
+                                        "type": "string",
+                                        "example": "KKN Tematik Desa Sukamaju",
+                                        "maxLength": 255
+                                    },
+                                    "user_nim": {
+                                        "type": "string",
+                                        "example": "2010001",
+                                        "maxLength": 20
+                                    },
+                                    "file_content": {
+                                        "description": "Isi file PDF dalam base64",
+                                        "type": "string",
+                                        "format": "byte"
+                                    },
+                                    "file_name": {
+                                        "type": "string",
+                                        "example": "peer-review.pdf",
+                                        "maxLength": 255
+                                    },
+                                    "file_mime_type": {
+                                        "type": "string",
+                                        "example": "application/pdf"
+                                    },
+                                    "file_size": {
+                                        "type": "integer",
+                                        "example": 204800
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Peer review berhasil disimpan"
+                    },
+                    "422": {
+                        "description": "Validasi gagal"
+                    },
+                    "500": {
+                        "description": "Terjadi kesalahan server"
+                    }
+                }
+            }
+        },
+        "/api/proposal/list": {
+            "get": {
+                "tags": [
+                    "Proposal"
+                ],
+                "summary": "Daftar semua proposal",
+                "description": "Mengambil seluruh data proposal beserta status verifikasinya.",
+                "operationId": "89209b332b1cd42b090184f9103179c0",
+                "responses": {
+                    "200": {
+                        "description": "Daftar proposal berhasil diambil"
+                    }
+                }
+            }
+        },
+        "/api/proposal/{id}": {
+            "get": {
+                "tags": [
+                    "Proposal"
+                ],
+                "summary": "Detail proposal",
+                "description": "Mengambil detail satu proposal berdasarkan ID.",
+                "operationId": "8deaecac6e81ff9a896b158a8399f7df",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID proposal",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        },
+                        "example": 1
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Detail proposal berhasil diambil"
+                    },
+                    "404": {
+                        "description": "Data tidak ditemukan"
+                    }
+                }
+            }
+        },
+        "/api/proposal/store-from-external": {
+            "post": {
+                "tags": [
+                    "Proposal"
+                ],
+                "summary": "Menerima proposal dari project-akhir",
+                "description": "Menyimpan proposal beserta file (dikirim sebagai string base64). Endpoint ini juga tersedia sebagai alias di /api/proposal/store.",
+                "operationId": "b38fc42072aecbf39a9e346be26aa999",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "judul_kegiatan",
+                                    "user_nim",
+                                    "file_content",
+                                    "file_name",
+                                    "file_mime_type",
+                                    "file_size"
+                                ],
+                                "properties": {
+                                    "judul_kegiatan": {
+                                        "type": "string",
+                                        "example": "KKN Tematik Desa Sukamaju",
+                                        "maxLength": 255
+                                    },
+                                    "user_nim": {
+                                        "type": "string",
+                                        "example": "2010001",
+                                        "maxLength": 20
+                                    },
+                                    "file_content": {
+                                        "description": "Isi file PDF dalam base64",
+                                        "type": "string",
+                                        "format": "byte"
+                                    },
+                                    "file_name": {
+                                        "type": "string",
+                                        "example": "proposal.pdf"
+                                    },
+                                    "file_mime_type": {
+                                        "type": "string",
+                                        "example": "application/pdf"
+                                    },
+                                    "file_size": {
+                                        "type": "integer",
+                                        "example": 204800
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Proposal berhasil disimpan"
+                    },
+                    "422": {
+                        "description": "Validasi gagal"
+                    },
+                    "500": {
+                        "description": "Terjadi kesalahan server"
+                    }
+                }
+            }
+        },
         "/api/dosen/list": {
             "get": {
                 "tags": [
@@ -211,16 +1491,140 @@
         }
     },
     "components": {
+        "schemas": {
+            "NilaiAkhirKomponen": {
+                "properties": {
+                    "proposal_kegiatan": {
+                        "type": "number",
+                        "format": "float",
+                        "example": 98,
+                        "nullable": true
+                    },
+                    "asistensi": {
+                        "type": "number",
+                        "format": "float",
+                        "example": 70,
+                        "nullable": true
+                    },
+                    "peer_review": {
+                        "type": "number",
+                        "format": "float",
+                        "example": 74,
+                        "nullable": true
+                    },
+                    "laporan_akhir": {
+                        "type": "number",
+                        "format": "float",
+                        "example": 98,
+                        "nullable": true
+                    },
+                    "presentasi_akhir": {
+                        "type": "number",
+                        "format": "float",
+                        "example": 78,
+                        "nullable": true
+                    },
+                    "pembimbing_lapangan": {
+                        "type": "number",
+                        "format": "float",
+                        "example": 87,
+                        "nullable": true
+                    }
+                },
+                "type": "object"
+            },
+            "NilaiAkhirItem": {
+                "required": [
+                    "nim",
+                    "nama",
+                    "program_studi",
+                    "nama_kelompok",
+                    "dosen",
+                    "sudah_dinilai",
+                    "nilai_akhir",
+                    "komponen"
+                ],
+                "properties": {
+                    "nim": {
+                        "type": "string",
+                        "example": "10221051"
+                    },
+                    "nama": {
+                        "type": "string",
+                        "example": "Nama Mahasiswa"
+                    },
+                    "program_studi": {
+                        "type": "string",
+                        "example": "Informatika",
+                        "nullable": true
+                    },
+                    "nama_kelompok": {
+                        "type": "string",
+                        "example": "Kelompok X"
+                    },
+                    "dosen": {
+                        "type": "string",
+                        "example": "Dr. Pembimbing"
+                    },
+                    "sudah_dinilai": {
+                        "type": "boolean",
+                        "example": true
+                    },
+                    "nilai_akhir": {
+                        "type": "number",
+                        "format": "float",
+                        "example": 86.4,
+                        "nullable": true
+                    },
+                    "komponen": {
+                        "$ref": "#/components/schemas/NilaiAkhirKomponen"
+                    }
+                },
+                "type": "object"
+            }
+        },
         "securitySchemes": {
-            "sanctum": {
-                "type": "http",
-                "description": "Masukkan token autentikasi Sanctum di sini.",
-                "bearerFormat": "Token",
-                "scheme": "bearer"
+            "ApiKeyAuth": {
+                "type": "apiKey",
+                "description": "Masukkan API key mitra di sini untuk endpoint tarik data nilai.",
+                "name": "X-API-KEY",
+                "in": "header"
             }
         }
     },
     "tags": [
+        {
+            "name": "Nilai Akhir",
+            "description": "Tarik data nilai akhir mahasiswa (untuk sistem mitra)"
+        },
+        {
+            "name": "KKN",
+            "description": "Pendaftaran KKN dari mahasiswa"
+        },
+        {
+            "name": "Proposal",
+            "description": "Pengajuan & verifikasi proposal"
+        },
+        {
+            "name": "Laporan Akhir",
+            "description": "Pengumpulan & verifikasi laporan akhir"
+        },
+        {
+            "name": "Luaran",
+            "description": "Pengumpulan & verifikasi luaran"
+        },
+        {
+            "name": "Peer Review",
+            "description": "Pengumpulan & verifikasi peer review"
+        },
+        {
+            "name": "Form Kesediaan",
+            "description": "Form kesediaan dosen pembimbing"
+        },
+        {
+            "name": "Nilai",
+            "description": "Penerimaan & data nilai dari project-akhir"
+        },
         {
             "name": "Dosen",
             "description": "Dosen"

@@ -16,6 +16,31 @@ use PhpOffice\PhpSpreadsheet\Style\Border;
 use PhpOffice\PhpSpreadsheet\Style\Fill;
 use OpenApi\Attributes as OA;
 
+#[OA\Schema(
+    schema: 'NilaiAkhirKomponen',
+    properties: [
+        new OA\Property(property: 'proposal_kegiatan', type: 'number', format: 'float', nullable: true, example: 98.0),
+        new OA\Property(property: 'asistensi', type: 'number', format: 'float', nullable: true, example: 70.0),
+        new OA\Property(property: 'peer_review', type: 'number', format: 'float', nullable: true, example: 74.0),
+        new OA\Property(property: 'laporan_akhir', type: 'number', format: 'float', nullable: true, example: 98.0),
+        new OA\Property(property: 'presentasi_akhir', type: 'number', format: 'float', nullable: true, example: 78.0),
+        new OA\Property(property: 'pembimbing_lapangan', type: 'number', format: 'float', nullable: true, example: 87.0),
+    ]
+)]
+#[OA\Schema(
+    schema: 'NilaiAkhirItem',
+    required: ['nim', 'nama', 'program_studi', 'nama_kelompok', 'dosen', 'sudah_dinilai', 'nilai_akhir', 'komponen'],
+    properties: [
+        new OA\Property(property: 'nim', type: 'string', example: '10221051'),
+        new OA\Property(property: 'nama', type: 'string', example: 'Nama Mahasiswa'),
+        new OA\Property(property: 'program_studi', type: 'string', nullable: true, example: 'Informatika'),
+        new OA\Property(property: 'nama_kelompok', type: 'string', example: 'Kelompok X'),
+        new OA\Property(property: 'dosen', type: 'string', example: 'Dr. Pembimbing'),
+        new OA\Property(property: 'sudah_dinilai', type: 'boolean', example: true),
+        new OA\Property(property: 'nilai_akhir', type: 'number', format: 'float', nullable: true, example: 86.4),
+        new OA\Property(property: 'komponen', ref: '#/components/schemas/NilaiAkhirKomponen'),
+    ]
+)]
 class NilaiAkhirController extends Controller
 {
     /**
@@ -883,17 +908,45 @@ class NilaiAkhirController extends Controller
      */
     #[OA\Get(
         path: '/api/nilai-akhir',
-        tags: ['Nilai'],
+        tags: ['Nilai Akhir'],
         summary: 'Tarik data nilai akhir semua mahasiswa (untuk mitra)',
-        description: 'Mengembalikan daftar nilai akhir seluruh mahasiswa dalam format JSON. Ditujukan untuk ditarik oleh sistem mitra. Wajib menyertakan header X-API-KEY.',
+        description: 'Mengembalikan daftar nilai akhir mahasiswa dalam format JSON. Ditujukan untuk ditarik oleh sistem mitra. Wajib menyertakan header X-API-KEY. Nilai berupa angka 0–100 (bukan huruf).',
         security: [['ApiKeyAuth' => []]],
         parameters: [
             new OA\Parameter(name: 'q', in: 'query', required: false, description: 'Kata kunci pencarian (nama/NIM/kelompok)', schema: new OA\Schema(type: 'string')),
         ],
         responses: [
-            new OA\Response(response: 200, description: 'Data berhasil diambil'),
-            new OA\Response(response: 401, description: 'API key tidak valid'),
-            new OA\Response(response: 500, description: 'Terjadi kesalahan server'),
+            new OA\Response(
+                response: 200,
+                description: 'Data berhasil diambil',
+                content: new OA\JsonContent(
+                    properties: [
+                        new OA\Property(property: 'success', type: 'boolean', example: true),
+                        new OA\Property(property: 'total', type: 'integer', example: 1),
+                        new OA\Property(property: 'data', type: 'array', items: new OA\Items(ref: '#/components/schemas/NilaiAkhirItem')),
+                    ]
+                )
+            ),
+            new OA\Response(
+                response: 401,
+                description: 'API key tidak valid',
+                content: new OA\JsonContent(
+                    properties: [
+                        new OA\Property(property: 'success', type: 'boolean', example: false),
+                        new OA\Property(property: 'message', type: 'string', example: 'API key tidak valid atau tidak diberikan.'),
+                    ]
+                )
+            ),
+            new OA\Response(
+                response: 500,
+                description: 'Terjadi kesalahan server',
+                content: new OA\JsonContent(
+                    properties: [
+                        new OA\Property(property: 'success', type: 'boolean', example: false),
+                        new OA\Property(property: 'message', type: 'string', example: 'Terjadi kesalahan server'),
+                    ]
+                )
+            ),
         ]
     )]
     public function apiIndex(Request $request)
@@ -922,18 +975,54 @@ class NilaiAkhirController extends Controller
      */
     #[OA\Get(
         path: '/api/nilai-akhir/{nim}',
-        tags: ['Nilai'],
+        tags: ['Nilai Akhir'],
         summary: 'Tarik data nilai akhir satu mahasiswa (untuk mitra)',
-        description: 'Mengembalikan nilai akhir satu mahasiswa berdasarkan NIM. Wajib menyertakan header X-API-KEY.',
+        description: 'Mengembalikan nilai akhir satu mahasiswa berdasarkan NIM. Wajib menyertakan header X-API-KEY. Nilai berupa angka 0–100 (bukan huruf).',
         security: [['ApiKeyAuth' => []]],
         parameters: [
             new OA\Parameter(name: 'nim', in: 'path', required: true, description: 'NIM mahasiswa', schema: new OA\Schema(type: 'string'), example: '10221051'),
         ],
         responses: [
-            new OA\Response(response: 200, description: 'Data berhasil diambil'),
-            new OA\Response(response: 401, description: 'API key tidak valid'),
-            new OA\Response(response: 404, description: 'Data tidak ditemukan'),
-            new OA\Response(response: 500, description: 'Terjadi kesalahan server'),
+            new OA\Response(
+                response: 200,
+                description: 'Data berhasil diambil',
+                content: new OA\JsonContent(
+                    properties: [
+                        new OA\Property(property: 'success', type: 'boolean', example: true),
+                        new OA\Property(property: 'data', ref: '#/components/schemas/NilaiAkhirItem'),
+                    ]
+                )
+            ),
+            new OA\Response(
+                response: 401,
+                description: 'API key tidak valid',
+                content: new OA\JsonContent(
+                    properties: [
+                        new OA\Property(property: 'success', type: 'boolean', example: false),
+                        new OA\Property(property: 'message', type: 'string', example: 'API key tidak valid atau tidak diberikan.'),
+                    ]
+                )
+            ),
+            new OA\Response(
+                response: 404,
+                description: 'Data tidak ditemukan',
+                content: new OA\JsonContent(
+                    properties: [
+                        new OA\Property(property: 'success', type: 'boolean', example: false),
+                        new OA\Property(property: 'message', type: 'string', example: 'Data nilai untuk NIM tersebut tidak ditemukan'),
+                    ]
+                )
+            ),
+            new OA\Response(
+                response: 500,
+                description: 'Terjadi kesalahan server',
+                content: new OA\JsonContent(
+                    properties: [
+                        new OA\Property(property: 'success', type: 'boolean', example: false),
+                        new OA\Property(property: 'message', type: 'string', example: 'Terjadi kesalahan server'),
+                    ]
+                )
+            ),
         ]
     )]
     public function apiShow(string $nim)
@@ -970,22 +1059,29 @@ class NilaiAkhirController extends Controller
         return [
             'nim' => $row['nim'],
             'nama' => $row['nama'],
-            'peran' => $row['peran'],
+            'program_studi' => $row['program_studi'] ?? null,
             'nama_kelompok' => $row['nama_kelompok'],
-            'judul_kegiatan' => $row['judul_kegiatan'],
             'dosen' => $row['dosen_nama'],
-            'sudah_dinilai' => $row['sudah_dinilai'],
-            'nilai_akhir' => $row['nilai_akhir'],
+            'sudah_dinilai' => (bool) $row['sudah_dinilai'],
+            'nilai_akhir' => $this->toNullableFloat($row['nilai_akhir'] ?? null),
             'komponen' => [
-                'proposal_kegiatan' => $p['proposal_kegiatan'] ?? null,
-                'asistensi' => $p['asistensi'] ?? null,
-                'peer_review' => $p['peer_review'] ?? null,
-                'laporan_akhir' => $p['laporan_akhir'] ?? null,
-                'presentasi_akhir' => $p['presentasi_akhir'] ?? null,
-                'pembimbing_lapangan' => $p['pembimbing_lapangan'] ?? null,
+                'proposal_kegiatan' => $this->toNullableFloat($p['proposal_kegiatan'] ?? null),
+                'asistensi' => $this->toNullableFloat($p['asistensi'] ?? null),
+                'peer_review' => $this->toNullableFloat($p['peer_review'] ?? null),
+                'laporan_akhir' => $this->toNullableFloat($p['laporan_akhir'] ?? null),
+                'presentasi_akhir' => $this->toNullableFloat($p['presentasi_akhir'] ?? null),
+                'pembimbing_lapangan' => $this->toNullableFloat($p['pembimbing_lapangan'] ?? null),
             ],
-            'tanggal_penilaian' => $p['tanggal_penilaian'] ?? null,
         ];
+    }
+
+    private function toNullableFloat(mixed $value): ?float
+    {
+        if ($value === null || $value === '') {
+            return null;
+        }
+
+        return round((float) $value, 2);
     }
 
     public function edit(string $id)
@@ -1077,6 +1173,7 @@ class NilaiAkhirController extends Controller
                 'no' => $no++,
                 'nim' => $nim,
                 'nama' => $member->mahasiswa->name ?? '-',
+                'program_studi' => $member->mahasiswa->program_studi ?? null,
                 'peran' => $member->peranLabel(),
                 'is_ketua' => $member->isLeader(),
                 'nama_kelompok' => $member->group?->nama_kelompok ?? 'Kelompok KKN',
