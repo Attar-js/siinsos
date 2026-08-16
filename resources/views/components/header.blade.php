@@ -80,15 +80,8 @@
                                 @endif
 
                                 @if(Auth::check() && Auth::user()->hasRole('tim_penciri'))
-                                <li class="has-dropdown has-menu-child-item">
-                                    <a href="#">Dashboard Verifikasi
-                                        <i class="feather-chevron-down"></i>
-                                    </a>
-                                    <ul class="submenu">
-                                        <li><a href="{{ route('tim-penciri.kesediaan-proposal') }}">Kesediaan Dosen dan Proposal</a></li>
-                                        <li><a href="{{ route('tim-penciri.rubrik-cpmk') }}">Rubrik Penilaian CPMK</a></li>
-                                        <li><a href="{{ route('tim-penciri.laporan-luaran') }}">Laporan Akhir dan Luaran</a></li>
-                                    </ul>
+                                <li class="with-megamenu has-menu-child-item position-static">
+                                    <a href="{{ route('admin.special-pages.pendaftar') }}">Verifikasi Pendaftar</a>
                                 </li>
                                 @endif
 
@@ -98,7 +91,6 @@
                                 </li>
                                 @endif
 
-                                @unless(Auth::check() && Auth::user()->hasRole('tim_penciri'))
                                 <li class="has-dropdown has-menu-child-item">
                                     <a href="#">Panduan
                                         <i class="feather-chevron-down"></i>
@@ -110,7 +102,6 @@
                                         <li><a href="{{ route('kontak.admin') }}">Kontak Admin Tim MK Penciri</a>
                                     </ul>
                                 </li>
-                                @endunless
                             </ul>
                         </nav>
                     </div>

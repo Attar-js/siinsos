@@ -22,29 +22,6 @@ use Illuminate\Support\Facades\Http;
 class DosenController extends Controller
 {
     /**
-     * Dashboard dosen
-     */
-    public function dashboard()
-    {
-        $dosen = Auth::user();
-        
-        // Ambil semua mahasiswa
-        $mahasiswa = User::where('role', 'mahasiswa')->get();
-        
-        // Statistik
-        $totalMahasiswa = $mahasiswa->count();
-        $mahasiswaSudahDinilai = Penilaian::where('dosen_id', $dosen->id)->count();
-        $mahasiswaBelumDinilai = $totalMahasiswa - $mahasiswaSudahDinilai;
-        
-        // Mahasiswa yang belum dinilai
-        $mahasiswaBelumDinilaiList = User::where('role', 'mahasiswa')
-            ->whereNotIn('id', Penilaian::where('dosen_id', $dosen->id)->pluck('mahasiswa_id'))
-            ->get();
-        
-        return view('dosen.dashboard', compact('mahasiswa', 'totalMahasiswa', 'mahasiswaSudahDinilai', 'mahasiswaBelumDinilai', 'mahasiswaBelumDinilaiList'));
-    }
-
-    /**
      * Halaman mahasiswa bimbingan
      */
     public function mahasiswaBimbingan()

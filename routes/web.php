@@ -6,7 +6,6 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\FaqController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\NotificationController;
-use App\Http\Controllers\TimPenciriController;
 use App\Http\Controllers\ProposalController;
 use App\Http\Controllers\LaporanAkhirController;
 
@@ -165,20 +164,6 @@ Route::middleware('auth')->group(function () {
         Route::post('/groups/{group}/assign-leader', [App\Http\Controllers\DosenController::class, 'assignLeader'])->name('groups.assign-leader');
     });
 
-    Route::middleware('role:tim_penciri')->prefix('tim-penciri')->name('tim-penciri.')->group(function () {
-        Route::get('/dashboard', [TimPenciriController::class, 'dashboard'])->name('dashboard');
-        Route::get('/kesediaan-proposal', [TimPenciriController::class, 'kesediaanProposal'])->name('kesediaan-proposal');
-        Route::get('/kesediaan', [TimPenciriController::class, 'kesediaan'])->name('kesediaan');
-        Route::get('/proposal', [TimPenciriController::class, 'proposal'])->name('proposal');
-        Route::get('/laporan-luaran', [TimPenciriController::class, 'laporanLuaran'])->name('laporan-luaran');
-        Route::post('/verify', [TimPenciriController::class, 'verify'])->name('verify');
-        Route::get('/detail/{id}', [TimPenciriController::class, 'detail'])->name('detail');
-        Route::post('/destroy/{id}', [TimPenciriController::class, 'destroy'])->name('destroy');
-        Route::get('/rubrik-cpmk', [TimPenciriController::class, 'rubrikCpmk'])->name('rubrik-cpmk');
-        Route::get('/rubrik-cpmk/{group}', [TimPenciriController::class, 'rubrikCpmkEdit'])->name('rubrik-cpmk.edit');
-        Route::post('/rubrik-cpmk/{group}/skor', [TimPenciriController::class, 'storeCpmkRubrikSkor'])->name('groups.cpmk-rubrik-skor');
-    });
-    
     // Template Routes
     Route::get('/template', [App\Http\Controllers\TemplateDokumenController::class, 'index'])->name('template.index');
     Route::get('/template/download/{key}', [App\Http\Controllers\TemplateDokumenController::class, 'download'])->name('template.download');

@@ -115,7 +115,7 @@ class AuthController extends Controller
         }
 
         if ($user && $user->hasRole('tim_penciri')) {
-            return redirect()->route('tim-penciri.dashboard');
+            return redirect()->route('admin.special-pages.pendaftar');
         }
 
         return redirect()->intended(route('landing'));

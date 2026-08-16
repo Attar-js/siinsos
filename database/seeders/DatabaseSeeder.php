@@ -94,7 +94,8 @@ class DatabaseSeeder extends Seeder
             ]
         );
 
-        // Akun tim MK penciri (dashboard verifikasi: /tim-penciri/dashboard).
+        // Akun tim MK penciri memakai role admin dan verifikasi di
+        // /admin/special-pages/pendaftar (bukan landing /tim-penciri).
         // User::updateOrCreate(
         //     ['email' => 'penciri@insos.test'],
         //     [

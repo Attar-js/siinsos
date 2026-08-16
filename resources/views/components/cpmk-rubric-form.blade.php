@@ -7,7 +7,6 @@
 
     $formAction = match ($mode) {
         'mahasiswa' => route('kkn.groups.cpmk-rubrik', $group->id),
-        'tim_penciri' => route('tim-penciri.groups.cpmk-rubrik-skor', $group->id),
         default => '#',
     };
 
