@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Models\GroupMember;
 use App\Models\Penilaian;
+use App\Models\StudyProgram;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
@@ -52,17 +53,33 @@ Tanpa API key, server mengembalikan 401.',
     ]
 )]
 #[OA\Schema(
+    schema: 'StudyProgram',
+    properties: [
+        new OA\Property(property: 'id', type: 'integer', example: 10),
+        new OA\Property(property: 'department_id', type: 'integer', nullable: true, example: 2),
+        new OA\Property(property: 'name', type: 'object', properties: [
+            new OA\Property(property: 'id', type: 'string', example: 'Informatika'),
+            new OA\Property(property: 'en', type: 'string', example: 'Informatics'),
+        ]),
+        new OA\Property(property: 'id_prodi_gerbang', type: 'string', example: '11111', description: 'Kode program studi simkur'),
+        new OA\Property(property: 'study_program_type_id', type: 'integer', nullable: true, example: 1),
+    ]
+)]
+#[OA\Schema(
     schema: 'NilaiAkhirItem',
-    required: ['nim', 'nama', 'program_studi', 'nama_kelompok', 'dosen', 'sudah_dinilai', 'nilai_akhir', 'komponen'],
+    required: ['nim', 'nama', 'study_program_id', 'nama_kelompok', 'dosen', 'sudah_dinilai', 'nilai_akhir', 'komponen', 'study_program'],
     properties: [
         new OA\Property(property: 'nim', type: 'string', example: '10221051'),
         new OA\Property(property: 'nama', type: 'string', example: 'Nama Mahasiswa'),
-        new OA\Property(property: 'program_studi', type: 'string', nullable: true, example: 'Informatika'),
+        new OA\Property(property: 'study_program_id', type: 'integer', nullable: true, example: 10),
         new OA\Property(property: 'nama_kelompok', type: 'string', example: 'Kelompok X'),
         new OA\Property(property: 'dosen', type: 'string', example: 'Dr. Pembimbing'),
+        new OA\Property(property: 'semester', type: 'integer', nullable: true, example: 1, description: 'Semester kegiatan (1 atau 2)'),
+        new OA\Property(property: 'tahun_kegiatan', type: 'integer', nullable: true, example: 2026, description: 'Tahun kegiatan (4 angka)'),
         new OA\Property(property: 'sudah_dinilai', type: 'boolean', example: true),
         new OA\Property(property: 'nilai_akhir', type: 'number', format: 'float', nullable: true, example: 86.4),
         new OA\Property(property: 'komponen', ref: '#/components/schemas/NilaiAkhirKomponen'),
+        new OA\Property(property: 'study_program', ref: '#/components/schemas/StudyProgram', nullable: true),
     ]
 )]
 class NilaiAkhirController extends Controller
@@ -884,11 +901,14 @@ class NilaiAkhirController extends Controller
     #[OA\Get(
         path: '/api/nilai-akhir',
         tags: ['Nilai Akhir'],
-        summary: 'Tarik data nilai akhir semua mahasiswa (untuk mitra)',
-        description: 'Mengembalikan daftar nilai akhir mahasiswa dalam format JSON. Ditujukan untuk ditarik oleh sistem mitra. Wajib menyertakan header X-API-KEY. Nilai berupa angka 0–100 (bukan huruf).',
+        summary: 'Tarik data nilai akhir semua mahasiswa',
+        description: 'Mengembalikan daftar nilai akhir mahasiswa dalam format JSON.',
         security: [['ApiKeyAuth' => []]],
         parameters: [
             new OA\Parameter(name: 'q', in: 'query', required: false, description: 'Kata kunci pencarian (nama/NIM/kelompok)', schema: new OA\Schema(type: 'string')),
+            new OA\Parameter(name: 'semester', in: 'query', required: false, description: 'Filter semester kegiatan (1 atau 2)', schema: new OA\Schema(type: 'integer', enum: [1, 2]), example: 1),
+            new OA\Parameter(name: 'tahun', in: 'query', required: false, description: 'Filter tahun kegiatan (4 angka)', schema: new OA\Schema(type: 'integer'), example: 2026),
+            new OA\Parameter(name: 'id_prodi_gerbang', in: 'query', required: false, description: 'Filter kode program studi simkur', schema: new OA\Schema(type: 'string'), example: '11111'),
         ],
         responses: [
             new OA\Response(
@@ -927,7 +947,10 @@ class NilaiAkhirController extends Controller
     public function apiIndex(Request $request)
     {
         try {
-            $rows = $this->buildMahasiswaRows(trim((string) $request->get('q', '')));
+            $rows = $this->buildMahasiswaRows(
+                trim((string) $request->get('q', '')),
+                $this->apiFilters($request)
+            );
             $data = array_map(fn ($row) => $this->transformForApi($row), $rows);
 
             return response()->json([
@@ -951,8 +974,8 @@ class NilaiAkhirController extends Controller
     #[OA\Get(
         path: '/api/nilai-akhir/{nim}',
         tags: ['Nilai Akhir'],
-        summary: 'Tarik data nilai akhir satu mahasiswa (untuk mitra)',
-        description: 'Mengembalikan nilai akhir satu mahasiswa berdasarkan NIM. Wajib menyertakan header X-API-KEY. Nilai berupa angka 0–100 (bukan huruf).',
+        summary: 'Tarik data nilai akhir satu mahasiswa',
+        description: 'Mengembalikan nilai akhir satu mahasiswa berdasarkan NIM.',
         security: [['ApiKeyAuth' => []]],
         parameters: [
             new OA\Parameter(name: 'nim', in: 'path', required: true, description: 'NIM mahasiswa', schema: new OA\Schema(type: 'string'), example: '10221051'),
@@ -1031,12 +1054,16 @@ class NilaiAkhirController extends Controller
     {
         $p = $row['penilaian'] ?? [];
 
+        $studyProgram = $row['study_program'] ?? null;
+
         return [
             'nim' => $row['nim'],
             'nama' => $row['nama'],
-            'program_studi' => $row['program_studi'] ?? null,
+            'study_program_id' => $studyProgram['id'] ?? null,
             'nama_kelompok' => $row['nama_kelompok'],
             'dosen' => $row['dosen_nama'],
+            'semester' => $row['semester'] !== null ? (int) $row['semester'] : null,
+            'tahun_kegiatan' => $row['tahun_kegiatan'] !== null ? (int) $row['tahun_kegiatan'] : null,
             'sudah_dinilai' => (bool) $row['sudah_dinilai'],
             'nilai_akhir' => $this->toNullableFloat($row['nilai_akhir'] ?? null),
             'komponen' => [
@@ -1047,6 +1074,7 @@ class NilaiAkhirController extends Controller
                 'presentasi_akhir' => $this->toNullableFloat($p['presentasi_akhir'] ?? null),
                 'pembimbing_lapangan' => $this->toNullableFloat($p['pembimbing_lapangan'] ?? null),
             ],
+            'study_program' => $studyProgram,
         ];
     }
 
@@ -1096,14 +1124,41 @@ class NilaiAkhirController extends Controller
         }
     }
 
+    private function apiFilters(Request $request): array
+    {
+        return [
+            'semester' => $request->query('semester'),
+            'tahun' => $request->query('tahun'),
+            'id_prodi_gerbang' => $request->query('id_prodi_gerbang'),
+        ];
+    }
+
+    private function resolveStudyProgram($mahasiswa): ?StudyProgram
+    {
+        if (! $mahasiswa) {
+            return null;
+        }
+
+        if ($mahasiswa->relationLoaded('studyProgram') && $mahasiswa->studyProgram) {
+            return $mahasiswa->studyProgram;
+        }
+
+        if ($mahasiswa->study_program_id) {
+            return StudyProgram::query()->find($mahasiswa->study_program_id);
+        }
+
+        $legacyId = StudyProgram::findIdByLegacyName($mahasiswa->program_studi);
+        return $legacyId ? StudyProgram::query()->find($legacyId) : null;
+    }
+
     /**
      * Daftar mahasiswa aktif per kelompok untuk halaman penilaian akhir.
      */
-    private function buildMahasiswaRows(?string $search = null): array
+    private function buildMahasiswaRows(?string $search = null, array $filters = []): array
     {
         $query = GroupMember::query()
             ->where('status', 'active')
-            ->with(['mahasiswa', 'group.dosen']);
+            ->with(['mahasiswa.studyProgram', 'group.dosen']);
 
         if ($search !== null && $search !== '') {
             $query->where(function ($q) use ($search) {
@@ -1117,6 +1172,36 @@ class NilaiAkhirController extends Controller
                             ->orWhere('nama_mitra', 'like', "%{$search}%")
                             ->orWhereHas('dosen', fn ($d) => $d->where('name', 'like', "%{$search}%"));
                     });
+            });
+        }
+
+        $semester = $filters['semester'] ?? null;
+        if ($semester !== null && $semester !== '') {
+            $query->whereHas('group', fn ($g) => $g->where('semester', (int) $semester));
+        }
+
+        $tahun = $filters['tahun'] ?? null;
+        if ($tahun !== null && $tahun !== '') {
+            $query->whereHas('group', fn ($g) => $g->where('tahun_kegiatan', (int) $tahun));
+        }
+
+        $kodeProdi = trim((string) ($filters['id_prodi_gerbang'] ?? ''));
+        if ($kodeProdi !== '') {
+            $legacyName = StudyProgram::query()
+                ->where('id_prodi_gerbang', $kodeProdi)
+                ->value('name');
+            $legacyNameId = is_array($legacyName) ? ($legacyName['id'] ?? null) : null;
+
+            $query->where(function ($q) use ($kodeProdi, $legacyNameId) {
+                $q->whereHas('mahasiswa.studyProgram', function ($sp) use ($kodeProdi) {
+                    $sp->where('id_prodi_gerbang', $kodeProdi);
+                });
+
+                if ($legacyNameId) {
+                    $q->orWhereHas('mahasiswa', function ($m) use ($legacyNameId) {
+                        $m->where('program_studi', $legacyNameId);
+                    });
+                }
             });
         }
 
@@ -1143,17 +1228,20 @@ class NilaiAkhirController extends Controller
             $dosenId = $member->group?->dosen_id;
             $key = $dosenId ? "{$nim}_{$dosenId}" : $nim;
             $penilaian = $penilaianMap[$key] ?? null;
+            $studyProgram = $this->resolveStudyProgram($member->mahasiswa);
 
             $rows[] = [
                 'no' => $no++,
                 'nim' => $nim,
                 'nama' => $member->mahasiswa->name ?? '-',
-                'program_studi' => $member->mahasiswa->program_studi ?? null,
+                'study_program' => $studyProgram?->toApiArray(),
                 'peran' => $member->peranLabel(),
                 'is_ketua' => $member->isLeader(),
                 'nama_kelompok' => $member->group?->nama_kelompok ?? 'Kelompok KKN',
                 'judul_kegiatan' => $member->group?->judul_kegiatan ?? '-',
                 'dosen_nama' => $member->group?->dosen?->name ?? '-',
+                'semester' => $member->group?->semester,
+                'tahun_kegiatan' => $member->group?->tahun_kegiatan,
                 'group_id' => $member->group_id,
                 'sudah_dinilai' => $penilaian && $penilaian->nilai_akhir !== null,
                 'nilai_akhir' => $penilaian?->nilai_akhir,

@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Models\StudyProgram;
 use App\Models\User;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
@@ -17,6 +18,10 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
+        $this->call(StudyProgramSeeder::class);
+
+        $informatikaId = StudyProgram::findIdByLegacyName('Informatika');
+
         // Role Spatie (dipakai halaman manajemen role/permission di modul admin).
         foreach (['admin', 'user'] as $roleName) {
             DB::table('roles')->updateOrInsert(
@@ -69,6 +74,7 @@ class DatabaseSeeder extends Seeder
                     'first_name' => $firstName,
                     'last_name' => $lastName,
                     'program_studi' => 'Informatika',
+                    'study_program_id' => $informatikaId,
                     'password' => Hash::make('password123'),
                     'user_type' => 'user',
                     'role' => 'mahasiswa',
@@ -87,6 +93,7 @@ class DatabaseSeeder extends Seeder
                 'first_name' => 'Dosen',
                 'last_name' => 'Contoh',
                 'program_studi' => 'Informatika',
+                'study_program_id' => $informatikaId,
                 'password' => Hash::make('password123'),
                 'user_type' => 'user',
                 'role' => 'dosen',

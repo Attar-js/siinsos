@@ -91,7 +91,7 @@
                                     @if($search)
                                         Tidak ada mahasiswa yang cocok dengan pencarian &ldquo;{{ $search }}&rdquo;.
                                     @else
-                                        Belum ada data mahasiswa aktif di kelompok KKN.
+                                        Belum ada data mahasiswa aktif di kelompok.
                                     @endif
                                 </td>
                             </tr>

@@ -17,8 +17,8 @@
                 "tags": [
                     "Nilai Akhir"
                 ],
-                "summary": "Tarik data nilai akhir semua mahasiswa (untuk mitra)",
-                "description": "Mengembalikan daftar nilai akhir mahasiswa dalam format JSON. Ditujukan untuk ditarik oleh sistem mitra. Wajib menyertakan header X-API-KEY. Nilai berupa angka 0–100 (bukan huruf).",
+                "summary": "Tarik data nilai akhir semua mahasiswa",
+                "description": "Mengembalikan daftar nilai akhir mahasiswa dalam format JSON.",
                 "operationId": "1240514a473c980a03a30bd090b5444c",
                 "parameters": [
                     {
@@ -29,6 +29,40 @@
                         "schema": {
                             "type": "string"
                         }
+                    },
+                    {
+                        "name": "semester",
+                        "in": "query",
+                        "description": "Filter semester kegiatan (1 atau 2)",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "enum": [
+                                1,
+                                2
+                            ]
+                        },
+                        "example": 1
+                    },
+                    {
+                        "name": "tahun",
+                        "in": "query",
+                        "description": "Filter tahun kegiatan (4 angka)",
+                        "required": false,
+                        "schema": {
+                            "type": "integer"
+                        },
+                        "example": 2026
+                    },
+                    {
+                        "name": "id_prodi_gerbang",
+                        "in": "query",
+                        "description": "Filter kode program studi simkur",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "11111"
                     }
                 ],
                 "responses": {
@@ -111,8 +145,8 @@
                 "tags": [
                     "Nilai Akhir"
                 ],
-                "summary": "Tarik data nilai akhir satu mahasiswa (untuk mitra)",
-                "description": "Mengembalikan nilai akhir satu mahasiswa berdasarkan NIM. Wajib menyertakan header X-API-KEY. Nilai berupa angka 0–100 (bukan huruf).",
+                "summary": "Tarik data nilai akhir satu mahasiswa",
+                "description": "Mengembalikan nilai akhir satu mahasiswa berdasarkan NIM.",
                 "operationId": "dd7b569dbd386527ecb0b2799ab3ac72",
                 "parameters": [
                     {
@@ -258,16 +292,54 @@
                 },
                 "type": "object"
             },
+            "StudyProgram": {
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "example": 10
+                    },
+                    "department_id": {
+                        "type": "integer",
+                        "example": 2,
+                        "nullable": true
+                    },
+                    "name": {
+                        "properties": {
+                            "id": {
+                                "type": "string",
+                                "example": "Informatika"
+                            },
+                            "en": {
+                                "type": "string",
+                                "example": "Informatics"
+                            }
+                        },
+                        "type": "object"
+                    },
+                    "id_prodi_gerbang": {
+                        "description": "Kode program studi simkur",
+                        "type": "string",
+                        "example": "11111"
+                    },
+                    "study_program_type_id": {
+                        "type": "integer",
+                        "example": 1,
+                        "nullable": true
+                    }
+                },
+                "type": "object"
+            },
             "NilaiAkhirItem": {
                 "required": [
                     "nim",
                     "nama",
-                    "program_studi",
+                    "study_program_id",
                     "nama_kelompok",
                     "dosen",
                     "sudah_dinilai",
                     "nilai_akhir",
-                    "komponen"
+                    "komponen",
+                    "study_program"
                 ],
                 "properties": {
                     "nim": {
@@ -278,9 +350,9 @@
                         "type": "string",
                         "example": "Nama Mahasiswa"
                     },
-                    "program_studi": {
-                        "type": "string",
-                        "example": "Informatika",
+                    "study_program_id": {
+                        "type": "integer",
+                        "example": 10,
                         "nullable": true
                     },
                     "nama_kelompok": {
@@ -290,6 +362,18 @@
                     "dosen": {
                         "type": "string",
                         "example": "Dr. Pembimbing"
+                    },
+                    "semester": {
+                        "description": "Semester kegiatan (1 atau 2)",
+                        "type": "integer",
+                        "example": 1,
+                        "nullable": true
+                    },
+                    "tahun_kegiatan": {
+                        "description": "Tahun kegiatan (4 angka)",
+                        "type": "integer",
+                        "example": 2026,
+                        "nullable": true
                     },
                     "sudah_dinilai": {
                         "type": "boolean",
@@ -303,6 +387,14 @@
                     },
                     "komponen": {
                         "$ref": "#/components/schemas/NilaiAkhirKomponen"
+                    },
+                    "study_program": {
+                        "oneOf": [
+                            {
+                                "$ref": "#/components/schemas/StudyProgram"
+                            }
+                        ],
+                        "nullable": true
                     }
                 },
                 "type": "object"

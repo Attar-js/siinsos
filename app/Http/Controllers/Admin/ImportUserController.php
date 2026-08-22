@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Models\StudyProgram;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
@@ -331,6 +332,7 @@ class ImportUserController extends Controller
             'nim' => $cfg['role'] === 'mahasiswa' ? ($nim ?: null) : null,
             'nip' => $cfg['role'] === 'dosen' ? ($nip ?: null) : null,
             'program_studi' => $get('program_studi') ?: null,
+            'study_program_id' => StudyProgram::findIdByLegacyName($get('program_studi')),
             'phone_number' => $get('phone_number') ?: null,
             'role' => $cfg['role'],
             'user_type' => $cfg['user_type'],

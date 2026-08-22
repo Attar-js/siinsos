@@ -27,6 +27,33 @@
         border-color: #0d6efd;
         box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
     }
+
+    .semester-select-wrap,
+    .semester-select-wrap .bootstrap-select,
+    .semester-select-wrap .bootstrap-select > .dropdown-toggle {
+        width: 100% !important;
+        max-width: 100% !important;
+    }
+
+    .semester-select-wrap .bootstrap-select {
+        display: block !important;
+    }
+
+    .semester-select-wrap .bootstrap-select > .dropdown-toggle {
+        height: 50px !important;
+        min-height: 50px !important;
+        padding: 0 15px !important;
+        font-size: 16px !important;
+        font-weight: 400 !important;
+        line-height: 50px !important;
+        border-radius: 8px !important;
+        border: 1px solid #dee2e6 !important;
+        background-color: #fff !important;
+        box-shadow: none !important;
+        display: flex !important;
+        align-items: center !important;
+        box-sizing: border-box !important;
+    }
     
     .card {
         border-radius: 12px;
@@ -310,6 +337,8 @@
                             <div class="col-md-6 group-info-item"><span class="group-info-label">Ketua:</span> {{ $myGroup->groupLeader->name ?? '-' }} ({{ $myGroup->groupLeader->nim ?? '-' }})</div>
                             <div class="col-md-6 group-info-item"><span class="group-info-label">Dosen Pembimbing:</span> {{ $myGroup->dosen->name ?? 'Belum dipilih' }}{{ $myGroup->dosen ? ' ('.($myGroup->dosen->nip ?? $myGroup->dosen->email).')' : '' }}</div>
                             <div class="col-md-6 group-info-item"><span class="group-info-label">Judul Kegiatan:</span> {{ $myGroup->judul_kegiatan ?? '-' }}</div>
+                            <div class="col-md-6 group-info-item"><span class="group-info-label">Semester:</span> {{ $myGroup->semester ?? '-' }}</div>
+                            <div class="col-md-6 group-info-item"><span class="group-info-label">Tahun Kegiatan:</span> {{ $myGroup->tahun_kegiatan ?? '-' }}</div>
                             <div class="col-md-6 group-info-item"><span class="group-info-label">Nama Mitra:</span> {{ $myGroup->nama_mitra ?? '-' }}</div>
                             <div class="col-md-6 group-info-item"><span class="group-info-label">Lokasi Mitra:</span> {{ $myGroup->lokasi_mitra ?? '-' }}</div>
                             <div class="col-md-6 group-info-item"><span class="group-info-label">Catatan:</span> {{ $myGroup->catatan ?? '-' }}</div>
@@ -504,6 +533,35 @@
                 @error('judul_kegiatan')
                     <div class="invalid-feedback">{{ $message }}</div>
                 @enderror
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6 mb-4">
+                        <label for="semester" class="form-label fw-bold">Semester Kegiatan</label>
+                        <div class="semester-select-wrap">
+                            <select class="form-control @error('semester') is-invalid @enderror"
+                                id="semester" name="semester" required
+                                data-width="100%"
+                                style="height: 50px; font-size: 16px; width: 100%;">
+                                <option value="">Pilih semester</option>
+                                <option value="1" {{ (string) old('semester') === '1' ? 'selected' : '' }}>1</option>
+                                <option value="2" {{ (string) old('semester') === '2' ? 'selected' : '' }}>2</option>
+                            </select>
+                        </div>
+                        @error('semester')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
+                    </div>
+                    <div class="col-md-6 mb-4">
+                        <label for="tahun_kegiatan" class="form-label fw-bold">Tahun Kegiatan</label>
+                        <input type="number" class="form-control @error('tahun_kegiatan') is-invalid @enderror"
+                            id="tahun_kegiatan" name="tahun_kegiatan" value="{{ old('tahun_kegiatan') }}"
+                            placeholder="Contoh: 2026" min="2000" max="2100" step="1" required
+                            style="height: 50px; font-size: 16px;">
+                        @error('tahun_kegiatan')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
+                    </div>
                 </div>
 
                 <div class="mb-4">

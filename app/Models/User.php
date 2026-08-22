@@ -23,6 +23,7 @@ class User extends Authenticatable
         'nip',
         'username',
         'program_studi',
+        'study_program_id',
         'first_name',
         'last_name',
         'phone_number',
@@ -52,6 +53,7 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'study_program_id' => 'integer',
         ];
     }
 
@@ -107,6 +109,11 @@ class User extends Authenticatable
     public function isActiveAccount(): bool
     {
         return empty($this->status) || in_array($this->status, ['active', 'aktif'], true);
+    }
+
+    public function studyProgram()
+    {
+        return $this->belongsTo(StudyProgram::class, 'study_program_id');
     }
 
     /**

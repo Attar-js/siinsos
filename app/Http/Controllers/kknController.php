@@ -127,6 +127,8 @@ class KknController extends Controller
 
         $request->validate([
             'judul_kegiatan' => 'required|string|max:255',
+            'semester' => 'required|integer|in:1,2',
+            'tahun_kegiatan' => 'required|integer|digits:4|min:2000|max:2100',
             'mitra' => 'required|string|max:100',
             'lokasi_mitra' => 'required|string|max:255',
             'nama_kelompok' => 'required|string|max:100',
@@ -137,6 +139,10 @@ class KknController extends Controller
             'proposal_file' => 'nullable|file|mimes:pdf|max:10240',
         ], [
             'judul_kegiatan.required' => 'Judul kegiatan harus diisi',
+            'semester.required' => 'Semester kegiatan harus dipilih',
+            'semester.in' => 'Semester kegiatan harus 1 atau 2',
+            'tahun_kegiatan.required' => 'Tahun kegiatan harus diisi',
+            'tahun_kegiatan.digits' => 'Tahun kegiatan harus 4 angka, misalnya 2026',
             'mitra.required' => 'Nama mitra harus diisi',
             'lokasi_mitra.required' => 'Lokasi mitra harus diisi',
             'nama_kelompok.required' => 'Nama kelompok harus diisi',
@@ -202,6 +208,8 @@ class KknController extends Controller
                 $group = Group::create([
                     'nama_kelompok' => trim($request->nama_kelompok),
                     'judul_kegiatan' => trim($request->judul_kegiatan),
+                    'semester' => (int) $request->semester,
+                    'tahun_kegiatan' => (int) $request->tahun_kegiatan,
                     'lokasi_kkn' => trim($request->lokasi_mitra),
                     'nama_mitra' => trim($request->mitra),
                     'lokasi_mitra' => trim($request->lokasi_mitra),

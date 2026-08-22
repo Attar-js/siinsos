@@ -12,6 +12,8 @@ class Group extends Model
     protected $fillable = [
         'nama_kelompok',
         'judul_kegiatan',
+        'semester',
+        'tahun_kegiatan',
         'lokasi_kkn',
         'deskripsi_kegiatan',
         'nama_mitra',
@@ -35,6 +37,8 @@ class Group extends Model
         'assigned_at' => 'datetime',
         'supervisor_approved_at' => 'datetime',
         'proposal_reviewed_at' => 'datetime',
+        'semester' => 'integer',
+        'tahun_kegiatan' => 'integer',
     ];
 
     // Relationships
